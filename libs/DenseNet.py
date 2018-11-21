@@ -40,7 +40,7 @@ class DenseNet(BASE_MODEL):
             x = tf.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5,
                                           name=name + '_bn')(x)
             x = tf.nn.relu(x, name='_1_relu')
-            x = tf.layers.Conv2D(int(input_tensor.get_shape()[bn_axis] * reduction), (1,1),
+            x = tf.layers.Conv2D(int(input_tensor.shape[bn_axis].value * reduction), (1,1),
                               use_bias=False,
                               name=name + '_conv')(x)
             x = tf.layers.AveragePooling2D(2, strides=2, name=name + '_pool')(x)

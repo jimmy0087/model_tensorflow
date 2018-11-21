@@ -101,3 +101,4 @@ class SEResNeXt(BASE_MODEL):
 
             x = tf.layers.Dense(self.num_classes,activation='softmax',name='final_fully_connected')(x)
         return x
+
