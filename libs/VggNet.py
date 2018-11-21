@@ -19,7 +19,7 @@ class Vgg16Net(BASE_MODEL):
     def inference(self,input):
         x = input
         self.layer_add(x, name="input")
-        with tf.variable_scope("VggNet") as scope:
+        with tf.variable_scope("VggNet",reuse=tf.AUTO_REUSE) as scope:
             x = self.vgg_block(x,filters = 64,cov_num = 2,name="block_1")
             x = tf.layers.MaxPooling2D(pool_size=3, strides=(2, 2), padding='same', name='maxpool_1')(x)
             self.layer_add(x, name="maxpool_1")

@@ -49,7 +49,7 @@ class DenseNet(BASE_MODEL):
     def inference(self,input):
         x = input
         blocks = [6, 12, 24, 16] #densenet121
-        with tf.variable_scope("DenseNet") as scope:
+        with tf.variable_scope("DenseNet",reuse=tf.AUTO_REUSE) as scope:
             x = tf.layers.Conv2D(64, 7, (2,2), use_bias=False,padding = 'same' ,name='conv1/conv')(x)
             x = tf.layers.BatchNormalization( epsilon=1.001e-5, name='conv1/bn')(x)
             x = tf.nn.relu(x, name='conv1/relu')

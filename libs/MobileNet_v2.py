@@ -95,7 +95,7 @@ class MobileNetV2(BASE_MODEL):
         x = input
         alpha = 1.0
         depth_multiplier = 1
-        with tf.variable_scope("MobileNetV2") as scope:
+        with tf.variable_scope("MobileNetV2",reuse=tf.AUTO_REUSE) as scope:
             first_block_filters = self._make_divisible(32 * alpha, 8)
 
             x = self._conv_block(x,first_block_filters,3,strides=(2,2),name='cov_1')

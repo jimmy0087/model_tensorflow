@@ -108,7 +108,7 @@ class InceptionResNet(BASE_MODEL):
 
     def inference(self,input):
         x = input
-        with tf.variable_scope("InceptionResNet") as scope:
+        with tf.variable_scope("InceptionResNet",reuse=tf.AUTO_REUSE) as scope:
             x = self.stem_block(x)
 
             for blocd_id in range(1,11):

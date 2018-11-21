@@ -44,7 +44,7 @@ class MobileNet(BASE_MODEL):
         x = input
         alpha = 1.0
         depth_multiplier = 1
-        with tf.variable_scope("MobileNet") as scope:
+        with tf.variable_scope("MobileNet",reuse=tf.AUTO_REUSE) as scope:
                 x = self._conv_block(x, 32, alpha, strides=(2, 2), name='conv_1')
                 x = self._depthwise_conv_block(x, 64, alpha, depth_multiplier, name='block_1')
                 x = self._depthwise_conv_block(x, 128, alpha, depth_multiplier,strides=(2, 2), name='block_2')

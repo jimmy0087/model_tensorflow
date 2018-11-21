@@ -112,7 +112,7 @@ class InceptionV3(BASE_MODEL):
 
     def inference(self,input):
         x = input
-        with tf.variable_scope("InceptionV3") as scope:
+        with tf.variable_scope("InceptionV3",reuse=tf.AUTO_REUSE) as scope:
             x = self.conv2d_bn(x, 32, (3, 3), strides=(2, 2), padding='valid',name="conv_1")
             x = self.conv2d_bn(x, 32, (3, 3), padding='valid',name="conv_2")
             x = self.conv2d_bn(x, 64, (3, 3),name="conv_3")

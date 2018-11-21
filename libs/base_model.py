@@ -57,16 +57,16 @@ class BASE_MODEL:
         for  key in self.sequence_layer.keys():
             print(self.sequence_layer[key].get_shape())
 
-    def loss(self,input,label):
-        output = self.inference(input)
-        loss = cross_entropy_with_logits(cls_prob=output,label=label)
-        acc = tf.metrics.accuracy(label,tf.argmax(output, axis=1))[1]
-        return loss,output,acc
+    def loss(self,input_pre,label):
+        #output = self.inference(input)
+        loss = cross_entropy_with_logits(cls_prob=input_pre,label=label)
+        acc = tf.metrics.accuracy(label,tf.argmax(input_pre, axis=1))[1]
+        return loss,acc
 
-    def evaluate(self,image,label):
+    def evaluate(self,input_pre,label):
         #output = self.inference(image)
-        acc = tf.metrics.accuracy(label, tf.argmax(image, axis=1))[1]
-        return acc,image
+        acc = tf.metrics.accuracy(label, tf.argmax(input_pre, axis=1))[1]
+        return acc
 
 class MODEL_GRAPH:
     def __init__(self,model,datasets,model_save_path=''):
@@ -86,9 +86,12 @@ class MODEL_GRAPH:
                                       name='input_image')
 
         self.label = tf.placeholder(tf.float32, shape=[BATCH_SIZE], name='label')
-        self.loss_op, self.output_op, self.acc_op = self.model.loss(self.input_image, self.label)
-        self.evaluate_acc, self.evaluate_output = self.model.evaluate(self.output_op, self.label)
-        _ = self.model.model_shape(self.input_image)
+
+        self.output_pre = self.model.inference(self.input_image)
+        self.loss_op, self.acc_op = self.model.loss(self.output_pre, self.label)
+        self.evaluate_acc = self.model.evaluate(self.output_pre, self.label)
+
+        #_ = self.model.model_shape(self.input_image)
         self.train_op = tf.train.GradientDescentOptimizer(LR).minimize(self.loss_op,self.global_step)
         self.init = tf.global_variables_initializer()
         self.sess = tf.Session()
@@ -106,7 +109,7 @@ class MODEL_GRAPH:
 
                 for step in range(train_step_sum):
                     image_batch_array, label_batch_array = self.data_source.next_train_batch()
-                    loss_, output_, acc_,_=self.sess.run([self.loss_op, self.output_op,self.acc_op,self.train_op],
+                    loss_, acc_,_=self.sess.run([self.loss_op,self.acc_op,self.train_op],
                                   feed_dict={self.input_image: image_batch_array, self.label: label_batch_array})
                     display_str = "{} :training step:{}/{},loss:{:.6f},acc :{:.4f}".format(datetime.now(), step,train_step_sum, loss_, acc_)
                     #report_progress(step+1, train_step_sum, dis_str=display_str)
@@ -126,15 +129,14 @@ class MODEL_GRAPH:
         self.sess.close()
 
     def evaluate(self):
-        #self.sess.run([tf.local_variables_initializer()])
         output_lists=[]
         label_lists=[]
         evaluate_step_sum = int(self.data_source.test_data_num/BATCH_SIZE)
         for step in range(evaluate_step_sum):
             image_batch_array, label_batch_array = self.data_source.next_test_batch()
-            evaluate_acc_ ,evaluate_output_= self.sess.run([self.evaluate_acc,self.evaluate_output],
-                                                 feed_dict={self.input_image: image_batch_array,
-                                                            self.label: label_batch_array})
+            evaluate_acc_ ,evaluate_output_= self.sess.run([self.evaluate_acc,self.output_pre],
+                                                             feed_dict={self.input_image: image_batch_array,
+                                                                        self.label: label_batch_array})
             output_lists.extend(np.argmax(evaluate_output_,axis=1))
             label_lists.extend(label_batch_array)
         evaluate_acc =accuracy_score(label_lists,output_lists)
@@ -160,7 +162,7 @@ class MODEL_GRAPH:
 
         pre_ = self.sess.run([self.test_pre],feed_dict={self.input_image_test: img})
         pre_c = np.argmax(pre_,axis=2)[0]
-        print("prediction is ")
+        print("prediction is: ")
         print(pre_c)
         return pre_c
 

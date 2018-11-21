@@ -68,7 +68,7 @@ class Xception(BASE_MODEL):
 
     def inference(self,input):
         x = input
-        with tf.variable_scope("Xception") as scope:
+        with tf.variable_scope("Xception",reuse=tf.AUTO_REUSE) as scope:
             x = self.conv2d_bn(x, 32, (3, 3), strides=(2, 2), name='block1_conv1')
             x = self.conv2d_bn(x, 64, (3, 3), strides=(2, 2), name='block1_conv2')
 

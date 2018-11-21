@@ -6,7 +6,7 @@ class AlexNet(BASE_MODEL):
     def inference(self,input):
         x= input
         self.layer_add(x, name='input')
-        with tf.variable_scope("AlexNet") as scope:
+        with tf.variable_scope("AlexNet",reuse=tf.AUTO_REUSE) as scope:
             x = tf.layers.Conv2D(filters = 96,  kernel_size=3, strides=(1,1), padding='same',
                              kernel_initializer=layers_lib.xavier_initializer(),
                              trainable=True,

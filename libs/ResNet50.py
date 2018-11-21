@@ -73,7 +73,7 @@ class ResNet50(BASE_MODEL):
 
     def inference(self,input):
         x = input
-        with tf.variable_scope("ResNet") as scope:
+        with tf.variable_scope("ResNet",reuse=tf.AUTO_REUSE) as scope:
             x = tf.layers.Conv2D(64, (7, 7),
                               strides=(2, 2),
                               padding='valid',

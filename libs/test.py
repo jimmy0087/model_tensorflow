@@ -56,12 +56,12 @@ class DATA_FASHION:
 
 if __name__=='__main__':
     data_fashion = DATA_FASHION()
-    MODEL = Inception_resnet_v2.InceptionResNet()
-    fashion_graph = MODEL_GRAPH(MODEL,data_fashion,"/home/jimxiang/YangCheng/model_tensorflow/model/DenseNet/DenseNet")
-    #fashion_graph.model_pretrained("model/Alex/Alex-2")
+    MODEL = SE_Net.SEResNeXt()
+    fashion_graph = MODEL_GRAPH(MODEL,data_fashion,"/home/jimxiang/YangCheng/model_tensorflow/model/SE_Net/SE_Net")
     fashion_graph.train(30)
-    #image = data_fashion.test_data()[0][0:2]
-    #image=np.resize(image, (2, IMG_WEIGHT, IMG_HIGH, IMG_CHANNEL))
-    #fashion_graph.predict(image,"../model/Alex/Alex-2")
+    # image = data_fashion.test_data()[0][0:128]
+    # image=np.resize(image, (128, IMG_WEIGHT, IMG_HIGH, IMG_CHANNEL))
+    # fashion_graph.predict(image,"../model/SE_Net/SE_Net-58")
+    # print()
     #train("../model/test")
     #batch_data()
