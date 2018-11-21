@@ -5,6 +5,8 @@ import ResNet50 as ResNet
 import MobileNet_v2 as MobileNetV2
 import SE_Net as SE_Net
 import DenseNet as DenseNet
+import Inception_resnet_v2 as Inception_resnet_v2
+
 from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
 from base_model import *
@@ -54,7 +56,7 @@ class DATA_FASHION:
 
 if __name__=='__main__':
     data_fashion = DATA_FASHION()
-    MODEL = DenseNet.DenseNet()
+    MODEL = Inception_resnet_v2.InceptionResNet()
     fashion_graph = MODEL_GRAPH(MODEL,data_fashion,"/home/jimxiang/YangCheng/model_tensorflow/model/DenseNet/DenseNet")
     #fashion_graph.model_pretrained("model/Alex/Alex-2")
     fashion_graph.train(30)

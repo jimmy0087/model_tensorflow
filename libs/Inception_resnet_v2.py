@@ -13,7 +13,7 @@ class InceptionResNet(BASE_MODEL):
                 use_bias=use_bias,
                 name=name + '_res')(input_tensor)
             if not use_bias:
-                x = tf.layers.BatchNormalization(ascale=False, name=name + '_bn')(x)
+                x = tf.layers.BatchNormalization(scale=False, name=name + '_bn')(x)
             if activation is not None:
                 x = tf.nn.relu(x, name='relu')
         return x
