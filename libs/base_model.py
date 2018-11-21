@@ -92,7 +92,7 @@ class MODEL_GRAPH:
         self.evaluate_acc = self.model.evaluate(self.output_pre, self.label)
 
         #_ = self.model.model_shape(self.input_image)
-        self.train_op = tf.train.GradientDescentOptimizer(LR).minimize(self.loss_op,self.global_step)
+        self.train_op = tf.train.AdamOptimizer(LR).minimize(self.loss_op,self.global_step)
         self.init = tf.global_variables_initializer()
         self.sess = tf.Session()
         self.saver = tf.train.Saver(max_to_keep=0)

@@ -111,25 +111,25 @@ class SEInceptionV4(BASE_MODEL):
 
     def Stem(self, input_tensor, scope):
         with tf.name_scope(scope) :
-            x = tf.layers.Conv2D( filters = 32, kernel_size = (3, 3), strides=(2,2), padding='valid', name=scope + '_conv1')(input_tensor)
-            x = tf.layers.Conv2D( filters = 32, kernel_size = (3, 3), padding='valid', name=scope+'_conv2')(x)
-            block_1 = tf.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', name=scope+'_conv3')(x)
+            x = tf.layers.Conv2D( filters = 32, kernel_size = (3, 3), strides=(2,2), padding='valid', kernel_initializer='he_normal', name=scope + '_conv1')(input_tensor)
+            x = tf.layers.Conv2D( filters = 32, kernel_size = (3, 3), padding='valid', kernel_initializer='he_normal', name=scope+'_conv2')(x)
+            block_1 = tf.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', kernel_initializer='he_normal',name=scope+'_conv3')(x)
 
             split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(block_1)
-            split_conv_x = tf.layers.Conv2D(filters=96, kernel_size=(3,3), strides=(2,2), padding='VALID', name=scope+'_split_conv1')(block_1)
+            split_conv_x = tf.layers.Conv2D(filters=96, kernel_size=(3,3), strides=(2,2), padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv1')(block_1)
             x = tf.concat([split_max_x,split_conv_x], axis=3)
 
-            split_conv_x1 = tf.layers.Conv2D(filters=64, kernel_size=(1,1), padding='same', name=scope+'_split_conv2')(x)
-            split_conv_x1 = tf.layers.Conv2D(filters=96, kernel_size=(3,3), padding='VALID', name=scope+'_split_conv3')(split_conv_x1)
+            split_conv_x1 = tf.layers.Conv2D(filters=64, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv2')(x)
+            split_conv_x1 = tf.layers.Conv2D(filters=96, kernel_size=(3,3), padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv3')(split_conv_x1)
 
-            split_conv_x2 = tf.layers.Conv2D( filters=64, kernel_size=(1,1), padding='same', name=scope+'_split_conv4')(x)
-            split_conv_x2 = tf.layers.Conv2D( filters=64, kernel_size=(7,1), padding='same', name=scope+'_split_conv5')(split_conv_x2)
-            split_conv_x2 = tf.layers.Conv2D( filters=64, kernel_size=(1,7), padding='same', name=scope+'_split_conv6')(split_conv_x2)
-            split_conv_x2 = tf.layers.Conv2D( filters=96, kernel_size=(3,3), padding='VALID', name=scope+'_split_conv7')(split_conv_x2)
+            split_conv_x2 = tf.layers.Conv2D( filters=64, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv4')(x)
+            split_conv_x2 = tf.layers.Conv2D( filters=64, kernel_size=(7,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv5')(split_conv_x2)
+            split_conv_x2 = tf.layers.Conv2D( filters=64, kernel_size=(1,7), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv6')(split_conv_x2)
+            split_conv_x2 = tf.layers.Conv2D( filters=96, kernel_size=(3,3), padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv7')(split_conv_x2)
 
             x = tf.concat([split_conv_x1,split_conv_x2], axis=3)
 
-            split_conv_x = tf.layers.Conv2D( filters=192, kernel_size=(3,3), strides=2, padding='VALID', name=scope+'_split_conv8')(x)
+            split_conv_x = tf.layers.Conv2D( filters=192, kernel_size=(3,3), strides=2, padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv8')(x)
             split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(x)
 
             x = tf.concat([split_conv_x, split_max_x], axis=3)
@@ -141,16 +141,16 @@ class SEInceptionV4(BASE_MODEL):
     def Inception_A(self, input_tensor, scope):
         with tf.name_scope(scope) :
             split_conv_x1 = tf.layers.AveragePooling2D(pool_size=(3,3),strides=1,padding='same')(input_tensor)
-            split_conv_x1 = tf.layers.Conv2D(filters=96, kernel_size=(1,1), padding='same', name=scope+'_split_conv1')(split_conv_x1)
+            split_conv_x1 = tf.layers.Conv2D(filters=96, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv1')(split_conv_x1)
 
-            split_conv_x2 = tf.layers.Conv2D(filters=96, kernel_size=(1,1), padding='same', name=scope+'_split_conv2')(input_tensor)
+            split_conv_x2 = tf.layers.Conv2D(filters=96, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv2')(input_tensor)
 
-            split_conv_x3 = tf.layers.Conv2D( filters=64, kernel_size=(1,1), padding='same', name=scope+'_split_conv3')(input_tensor)
-            split_conv_x3 = tf.layers.Conv2D( filters=96, kernel_size=(3,3), padding='same', name=scope+'_split_conv4')(split_conv_x3)
+            split_conv_x3 = tf.layers.Conv2D( filters=64, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv3')(input_tensor)
+            split_conv_x3 = tf.layers.Conv2D( filters=96, kernel_size=(3,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv4')(split_conv_x3)
 
-            split_conv_x4 = tf.layers.Conv2D( filters=64, kernel_size=(1,1), padding='same', name=scope+'_split_conv5')(input_tensor)
-            split_conv_x4 = tf.layers.Conv2D( filters=96, kernel_size=(3,3), padding='same', name=scope+'_split_conv6')(split_conv_x4)
-            split_conv_x4 = tf.layers.Conv2D( filters=96, kernel_size=(3,3), padding='same', name=scope+'_split_conv7')(split_conv_x4)
+            split_conv_x4 = tf.layers.Conv2D( filters=64, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv5')(input_tensor)
+            split_conv_x4 = tf.layers.Conv2D( filters=96, kernel_size=(3,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv6')(split_conv_x4)
+            split_conv_x4 = tf.layers.Conv2D( filters=96, kernel_size=(3,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv7')(split_conv_x4)
 
             x = tf.concat([split_conv_x1, split_conv_x2, split_conv_x3, split_conv_x4], axis=3)
 
@@ -163,19 +163,19 @@ class SEInceptionV4(BASE_MODEL):
         with tf.name_scope(scope) :
 
             split_conv_x1 = tf.layers.AveragePooling2D(pool_size=(3,3),strides=1,padding='same')(input_tensor)
-            split_conv_x1 = tf.layers.Conv2D( filters=128, kernel_size=(1,1), padding='same', name=scope+'_split_conv1')(split_conv_x1)
+            split_conv_x1 = tf.layers.Conv2D( filters=128, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv1')(split_conv_x1)
 
-            split_conv_x2 = tf.layers.Conv2D( filters=384, kernel_size=(1,1), padding='same', name=scope+'_split_conv2')(input_tensor)
+            split_conv_x2 = tf.layers.Conv2D( filters=384, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv2')(input_tensor)
 
-            split_conv_x3 = tf.layers.Conv2D( filters=192, kernel_size=(1,1), padding='same', name=scope+'_split_conv3')(input_tensor)
-            split_conv_x3 = tf.layers.Conv2D( filters=224, kernel_size=(1,7), padding='same', name=scope+'_split_conv4')(split_conv_x3)
-            split_conv_x3 = tf.layers.Conv2D( filters=256, kernel_size=(1,7), padding='same', name=scope+'_split_conv5')(split_conv_x3)
+            split_conv_x3 = tf.layers.Conv2D( filters=192, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv3')(input_tensor)
+            split_conv_x3 = tf.layers.Conv2D( filters=224, kernel_size=(1,7), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv4')(split_conv_x3)
+            split_conv_x3 = tf.layers.Conv2D( filters=256, kernel_size=(1,7), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv5')(split_conv_x3)
 
-            split_conv_x4 = tf.layers.Conv2D( filters=192, kernel_size=(1,1), padding='same', name=scope+'_split_conv6')(input_tensor)
-            split_conv_x4 = tf.layers.Conv2D( filters=192, kernel_size=(1,7), padding='same', name=scope+'_split_conv7')(split_conv_x4)
-            split_conv_x4 = tf.layers.Conv2D( filters=224, kernel_size=[7,1], padding='same', name=scope+'_split_conv8')(split_conv_x4)
-            split_conv_x4 = tf.layers.Conv2D( filters=224, kernel_size=(1,7), padding='same', name=scope+'_split_conv9')(split_conv_x4)
-            split_conv_x4 = tf.layers.Conv2D( filters=256, kernel_size=(7,1), padding='same', name=scope+'_split_conv10')(split_conv_x4)
+            split_conv_x4 = tf.layers.Conv2D( filters=192, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv6')(input_tensor)
+            split_conv_x4 = tf.layers.Conv2D( filters=192, kernel_size=(1,7), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv7')(split_conv_x4)
+            split_conv_x4 = tf.layers.Conv2D( filters=224, kernel_size=[7,1], padding='same', kernel_initializer='he_normal',name=scope+'_split_conv8')(split_conv_x4)
+            split_conv_x4 = tf.layers.Conv2D( filters=224, kernel_size=(1,7), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv9')(split_conv_x4)
+            split_conv_x4 = tf.layers.Conv2D( filters=256, kernel_size=(7,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv10')(split_conv_x4)
 
             x = tf.concat([split_conv_x1, split_conv_x2, split_conv_x3, split_conv_x4], axis=3)
 
@@ -187,19 +187,19 @@ class SEInceptionV4(BASE_MODEL):
     def Inception_C(self, input_tensor, scope):
         with tf.name_scope(scope) :
             split_conv_x1 = tf.layers.AveragePooling2D(pool_size=(3,3),strides=1,padding='same')(input_tensor)
-            split_conv_x1 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', name=scope+'_split_conv1')(split_conv_x1)
+            split_conv_x1 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv1')(split_conv_x1)
 
-            split_conv_x2 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', name=scope+'_split_conv2')(input_tensor)
+            split_conv_x2 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv2')(input_tensor)
 
-            split_conv_x3 = tf.layers.Conv2D( filters=384, kernel_size=(1,1), padding='same', name=scope+'_split_conv3')(input_tensor)
-            split_conv_x3_1 = tf.layers.Conv2D( filters=256, kernel_size=(1,3), padding='same', name=scope+'_split_conv4')(split_conv_x3)
-            split_conv_x3_2 = tf.layers.Conv2D( filters=256, kernel_size=(3,1), padding='same', name=scope+'_split_conv5')(split_conv_x3)
+            split_conv_x3 = tf.layers.Conv2D( filters=384, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv3')(input_tensor)
+            split_conv_x3_1 = tf.layers.Conv2D( filters=256, kernel_size=(1,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv4')(split_conv_x3)
+            split_conv_x3_2 = tf.layers.Conv2D( filters=256, kernel_size=(3,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv5')(split_conv_x3)
 
-            split_conv_x4 = tf.layers.Conv2D( filters=384, kernel_size=(1,1), padding='same', name=scope+'_split_conv6')(input_tensor)
-            split_conv_x4 = tf.layers.Conv2D( filters=448, kernel_size=(1,3), padding='same', name=scope+'_split_conv7')(split_conv_x4)
-            split_conv_x4 = tf.layers.Conv2D( filters=512, kernel_size=(3,1), padding='same', name=scope+'_split_conv8')(split_conv_x4)
-            split_conv_x4_1 = tf.layers.Conv2D( filters=256, kernel_size=(3,1), padding='same', name=scope+'_split_conv9')(split_conv_x4)
-            split_conv_x4_2 = tf.layers.Conv2D( filters=256, kernel_size=(1,3), padding='same', name=scope+'_split_conv10')(split_conv_x4)
+            split_conv_x4 = tf.layers.Conv2D( filters=384, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv6')(input_tensor)
+            split_conv_x4 = tf.layers.Conv2D( filters=448, kernel_size=(1,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv7')(split_conv_x4)
+            split_conv_x4 = tf.layers.Conv2D( filters=512, kernel_size=(3,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv8')(split_conv_x4)
+            split_conv_x4_1 = tf.layers.Conv2D( filters=256, kernel_size=(3,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv9')(split_conv_x4)
+            split_conv_x4_2 = tf.layers.Conv2D( filters=256, kernel_size=(1,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv10')(split_conv_x4)
 
             x = tf.concat([split_conv_x1, split_conv_x2, split_conv_x3_1, split_conv_x3_2, split_conv_x4_1, split_conv_x4_2], axis=3)
 
@@ -217,11 +217,11 @@ class SEInceptionV4(BASE_MODEL):
 
             split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(input_tensor)
 
-            split_conv_x1 = tf.layers.Conv2D(filters=n, kernel_size=(3,3), strides=2, padding='VALID', name=scope+'_split_conv1')(input_tensor)
+            split_conv_x1 = tf.layers.Conv2D(filters=n, kernel_size=(3,3), strides=2, padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv1')(input_tensor)
 
-            split_conv_x2 = tf.layers.Conv2D( filters=k, kernel_size=(1,1), padding='same', name=scope+'_split_conv2')(input_tensor)
-            split_conv_x2 = tf.layers.Conv2D( filters=l, kernel_size=(3,3), padding='same', name=scope+'_split_conv3')(split_conv_x2)
-            split_conv_x2 = tf.layers.Conv2D( filters=m, kernel_size=(3,3), strides=2, padding='VALID', name=scope+'_split_conv4')(split_conv_x2)
+            split_conv_x2 = tf.layers.Conv2D( filters=k, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv2')(input_tensor)
+            split_conv_x2 = tf.layers.Conv2D( filters=l, kernel_size=(3,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv3')(split_conv_x2)
+            split_conv_x2 = tf.layers.Conv2D( filters=m, kernel_size=(3,3), strides=2, padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv4')(split_conv_x2)
 
             x = tf.concat([split_max_x, split_conv_x1, split_conv_x2], axis=3)
 
@@ -234,15 +234,15 @@ class SEInceptionV4(BASE_MODEL):
         with tf.name_scope(scope) :
             split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(input_tensor)
 
-            split_conv_x1 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', name=scope+'_split_conv1')(input_tensor)
-            split_conv_x1 = tf.layers.Conv2D( filters=384, kernel_size=(3,3), strides=2, padding='VALID', name=scope+'_split_conv2')(split_conv_x1)
+            split_conv_x1 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv1')(input_tensor)
+            split_conv_x1 = tf.layers.Conv2D( filters=384, kernel_size=(3,3), strides=2, padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv2')(split_conv_x1)
 
-            split_conv_x2 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', name=scope+'_split_conv3')(input_tensor)
-            split_conv_x2 = tf.layers.Conv2D( filters=288, kernel_size=(3,3), strides=2, padding='VALID', name=scope+'_split_conv4')(split_conv_x2)
+            split_conv_x2 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv3')(input_tensor)
+            split_conv_x2 = tf.layers.Conv2D( filters=288, kernel_size=(3,3), strides=2, padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv4')(split_conv_x2)
 
-            split_conv_x3 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', name=scope+'_split_conv5')(input_tensor)
-            split_conv_x3 = tf.layers.Conv2D( filters=288, kernel_size=(3,3), padding='same', name=scope+'_split_conv6')(split_conv_x3)
-            split_conv_x3 = tf.layers.Conv2D( filters=320, kernel_size=(3,3), strides=2, padding='VALID', name=scope+'_split_conv7')(split_conv_x3)
+            split_conv_x3 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv5')(input_tensor)
+            split_conv_x3 = tf.layers.Conv2D( filters=288, kernel_size=(3,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv6')(split_conv_x3)
+            split_conv_x3 = tf.layers.Conv2D( filters=320, kernel_size=(3,3), strides=2, padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv7')(split_conv_x3)
 
             x = tf.concat([split_max_x, split_conv_x1, split_conv_x2, split_conv_x3], axis=3)
 
