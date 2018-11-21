@@ -56,7 +56,7 @@ class DATA_FASHION:
 
 if __name__=='__main__':
     data_fashion = DATA_FASHION()
-    MODEL = SE_Net.SEResNeXt()
+    MODEL = SE_Net.SEInceptionV4()
     fashion_graph = MODEL_GRAPH(MODEL,data_fashion,"/home/jimxiang/YangCheng/model_tensorflow/model/SE_Net/SE_Net")
     fashion_graph.train(30)
     # image = data_fashion.test_data()[0][0:128]
