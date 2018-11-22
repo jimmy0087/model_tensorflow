@@ -110,7 +110,7 @@ class SEInceptionV4(BASE_MODEL):
         BASE_MODEL.__init__(self,num_classes=10,trainable = True)
 
     def Stem(self, input_tensor, scope):
-        with tf.name_scope(scope) :
+        with tf.variable_scope(scope) :
             x = tf.layers.Conv2D( filters = 32, kernel_size = (3, 3), strides=(2,2), padding='valid', kernel_initializer='he_normal', name=scope + '_conv1')(input_tensor)
             x = tf.layers.Conv2D( filters = 32, kernel_size = (3, 3), padding='valid', kernel_initializer='he_normal', name=scope+'_conv2')(x)
             block_1 = tf.layers.Conv2D(filters=64, kernel_size=(3,3), padding='same', kernel_initializer='he_normal',name=scope+'_conv3')(x)
@@ -139,7 +139,7 @@ class SEInceptionV4(BASE_MODEL):
             return x
 
     def Inception_A(self, input_tensor, scope):
-        with tf.name_scope(scope) :
+        with tf.variable_scope(scope) :
             split_conv_x1 = tf.layers.AveragePooling2D(pool_size=(3,3),strides=1,padding='same')(input_tensor)
             split_conv_x1 = tf.layers.Conv2D(filters=96, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv1')(split_conv_x1)
 
@@ -160,7 +160,7 @@ class SEInceptionV4(BASE_MODEL):
             return x
 
     def Inception_B(self, input_tensor, scope):
-        with tf.name_scope(scope) :
+        with tf.variable_scope(scope) :
 
             split_conv_x1 = tf.layers.AveragePooling2D(pool_size=(3,3),strides=1,padding='same')(input_tensor)
             split_conv_x1 = tf.layers.Conv2D( filters=128, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv1')(split_conv_x1)
@@ -185,7 +185,7 @@ class SEInceptionV4(BASE_MODEL):
             return x
 
     def Inception_C(self, input_tensor, scope):
-        with tf.name_scope(scope) :
+        with tf.variable_scope(scope) :
             split_conv_x1 = tf.layers.AveragePooling2D(pool_size=(3,3),strides=1,padding='same')(input_tensor)
             split_conv_x1 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv1')(split_conv_x1)
 
@@ -209,7 +209,7 @@ class SEInceptionV4(BASE_MODEL):
             return x
 
     def Reduction_A(self, input_tensor, scope):
-        with tf.name_scope(scope) :
+        with tf.variable_scope(scope) :
             k = 256
             l = 256
             m = 384
@@ -231,7 +231,7 @@ class SEInceptionV4(BASE_MODEL):
             return x
 
     def Reduction_B(self, input_tensor, scope):
-        with tf.name_scope(scope) :
+        with tf.variable_scope(scope) :
             split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(input_tensor)
 
             split_conv_x1 = tf.layers.Conv2D( filters=256, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv1')(input_tensor)
@@ -252,7 +252,7 @@ class SEInceptionV4(BASE_MODEL):
             return x
 
     def Squeeze_excitation_layer(self, input_x, out_dim, ratio, layer_name):
-        with tf.name_scope(layer_name) :
+        with tf.variable_scope(layer_name) :
             squeeze = tf.keras.layers.GlobalAveragePooling2D()(input_x)
 
             excitation = tf.layers.Dense(units=out_dim / ratio, name=layer_name+'_fully_connected1')(squeeze)
@@ -291,6 +291,209 @@ class SEInceptionV4(BASE_MODEL):
             x = self.Inception_C(x, scope='Inception_C'+str(i))
             channel = int(np.shape(x)[-1])
             x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C'+str(i))
+
+        x = tf.keras.layers.GlobalAveragePooling2D()(x)
+        x = tf.layers.Dropout(rate=0.2)(x)
+        x = tf.layers.Flatten()(x)
+
+        x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
+        return x
+
+
+class SEInceptionResnetV2(BASE_MODEL):
+    def __init__(self,num_classes=10,trainable = True):
+        self.num_classes = num_classes
+        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        
+    def Stem(self, input_tensor, scope):
+        with tf.variable_scope(scope) :
+            x = self.conv_layer( input_tensor, filters = 32, kernel_size = (3, 3), strides=2, padding='valid', name= scope + '_conv1')
+            x = self.conv_layer( x,filters = 32, kernel_size = (3, 3), padding='valid', name=scope+'_conv2')
+            block_1 = self.conv_layer(x,filters=64, kernel_size=(3,3),name=scope+'_conv3')
+
+            split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(block_1)
+            split_conv_x = self.conv_layer(block_1,filters=96, kernel_size=(3,3), strides=2, padding='VALID',name=scope+'_split_conv1')
+
+            x = tf.concat([split_max_x,split_conv_x], axis=3)
+
+            split_conv_x1 = self.conv_layer(x,filters=64, kernel_size=(1,1),name=scope+'_split_conv2')
+            split_conv_x1 = self.conv_layer(split_conv_x1,filters=96, kernel_size=(3,3), padding='VALID',name=scope+'_split_conv3')
+
+            split_conv_x2 = self.conv_layer( x , filters=64, kernel_size=(1,1), name=scope+'_split_conv4')
+            split_conv_x2 = self.conv_layer( split_conv_x2 , filters=64, kernel_size=(7,1), name=scope+'_split_conv5')
+            split_conv_x2 = self.conv_layer( split_conv_x2 , filters=64, kernel_size=(1,7), name=scope+'_split_conv6')
+            split_conv_x2 = self.conv_layer( split_conv_x2 , filters=96, kernel_size=(3,3), padding='VALID',name=scope+'_split_conv7')
+
+            x = tf.concat([split_conv_x1,split_conv_x2], axis=3)
+
+            split_conv_x = self.conv_layer( x , filters=192, kernel_size=(3,3), strides=2, padding='VALID', name=scope+'_split_conv8')
+            split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(x)
+
+            x = tf.concat([split_conv_x, split_max_x], axis=3)
+
+            x = tf.layers.BatchNormalization(name=scope+'_batch1')(x)
+            x = tf.nn.leaky_relu(x)
+            return x
+
+    def Inception_resnet_A(self, input_tensor, scope):
+        with tf.variable_scope(scope):
+            init = input_tensor
+
+            split_conv_x1 = self.conv_layer( input_tensor , filters=32, kernel_size=[1, 1], padding='same', name=scope + '_split_conv1')
+
+            split_conv_x2 = self.conv_layer( input_tensor , filters=32, kernel_size=[1, 1], padding='same', name=scope + '_split_conv2')
+            split_conv_x2 = self.conv_layer(split_conv_x2 , filters=32, kernel_size=[3, 3], padding='same', name=scope + '_split_conv3')
+
+            split_conv_x3 = self.conv_layer( input_tensor , filters=32, kernel_size=[1, 1], padding='same', name=scope + '_split_conv4')
+            split_conv_x3 = self.conv_layer(split_conv_x3 , filters=48, kernel_size=[3, 3], padding='same', name=scope + '_split_conv5')
+            split_conv_x3 = self.conv_layer(split_conv_x3 , filters=64, kernel_size=[3, 3], padding='same', name=scope + '_split_conv6')
+
+            x = tf.concat([split_conv_x1, split_conv_x2, split_conv_x3], axis=3)
+            x = self.conv_layer(x , filters=384, kernel_size=[1, 1], padding='same', activation=False , name=scope + '_final_conv1')
+
+            #x = x * 0.1
+            x = init + x
+
+            x = tf.layers.BatchNormalization(name=scope + '_batch1')(x)
+            x = tf.nn.leaky_relu(x)
+
+            return x
+
+    def Inception_resnet_B(self, input_tensor, scope):
+        with tf.variable_scope(scope):
+            init = input_tensor
+
+            split_conv_x1 = self.conv_layer(input_tensor , filters=192, kernel_size=[1, 1], padding='same',name=scope + '_split_conv1')
+
+            split_conv_x2 = self.conv_layer( input_tensor , filters=128, kernel_size=[1, 1], padding='same',name=scope + '_split_conv2')
+            split_conv_x2 = self.conv_layer(split_conv_x2 , filters=160, kernel_size=[1, 7], padding='same',name=scope + '_split_conv3')
+            split_conv_x2 = self.conv_layer(split_conv_x2 , filters=192, kernel_size=[7, 1], padding='same',name=scope + '_split_conv4')
+
+            x = tf.concat([split_conv_x1, split_conv_x2], axis=3)
+            x = self.conv_layer(x , filters=1152, kernel_size=[1, 1], padding='same',activation=False , name=scope + '_final_conv1')
+            # 1154
+            #x = x * 0.1
+            x = init + x
+
+            x = tf.layers.BatchNormalization(name=scope + '_batch1')(x)
+            x = tf.nn.leaky_relu(x)
+
+            return x
+
+    def Inception_resnet_C(self, input_tensor, scope):
+        with tf.variable_scope(scope):
+            init = input_tensor
+
+            split_conv_x1 = self.conv_layer(input_tensor , filters=192, kernel_size=[1, 1], name=scope + '_split_conv1')
+
+            split_conv_x2 = self.conv_layer(input_tensor , filters=192, kernel_size=[1, 1], name=scope + '_split_conv2')
+            split_conv_x2 = self.conv_layer(split_conv_x2, filters=224, kernel_size=[1, 3], name=scope + '_split_conv3')
+            split_conv_x2 = self.conv_layer(split_conv_x2, filters=256, kernel_size=[3, 1], name=scope + '_split_conv4')
+
+            x = tf.concat([split_conv_x1, split_conv_x2],axis=3)
+            x = self.conv_layer(x , filters=2144, kernel_size=[1, 1], activation=False , name=scope + '_final_conv2')
+            # 2048
+            #x = x * 0.1
+            x = init + x
+
+            x = tf.layers.BatchNormalization(name=scope + '_batch1')(x)
+            x = tf.nn.leaky_relu(x)
+
+            return x
+
+    def Reduction_A(self, input_tensor, scope):
+        with tf.variable_scope(scope):
+            k = 256
+            l = 256
+            m = 384
+            n = 384
+
+            split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(input_tensor)
+
+            split_conv_x1 = self.conv_layer(input_tensor, filters=n, kernel_size=[3, 3], strides=2, padding='VALID',name=scope + '_split_conv1')
+
+            split_conv_x2 = self.conv_layer(input_tensor, filters=k, kernel_size=[1, 1], name=scope + '_split_conv2')
+            split_conv_x2 = self.conv_layer(split_conv_x2, filters=l, kernel_size=[3, 3], name=scope + '_split_conv3')
+            split_conv_x2 = self.conv_layer(split_conv_x2, filters=m, kernel_size=[3, 3], strides=2, padding='VALID', name=scope + '_split_conv4')
+
+            x = tf.concat([split_max_x, split_conv_x1, split_conv_x2],axis=3)
+
+            x = tf.layers.BatchNormalization(name=scope + '_batch1')(x)
+            x = tf.nn.leaky_relu(x)
+
+            return x
+
+    def Reduction_B(self, input_tensor, scope):
+        with tf.variable_scope(scope):
+            split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(input_tensor)
+
+            split_conv_x1 = self.conv_layer(input_tensor , filters=256, kernel_size=[1, 1],name=scope + '_split_conv1')
+            split_conv_x1 = self.conv_layer(split_conv_x1, filters=384, kernel_size=[3, 3], strides=2, padding='VALID',name=scope + '_split_conv2')
+
+            split_conv_x2 = self.conv_layer(input_tensor , filters=256, kernel_size=[1, 1],name=scope + '_split_conv3')
+            split_conv_x2 = self.conv_layer(split_conv_x2, filters=288, kernel_size=[3, 3], strides=2, padding='VALID',name=scope + '_split_conv4')
+
+            split_conv_x3 = self.conv_layer(input_tensor , filters=256, kernel_size=[1, 1],name=scope + '_split_conv5')
+            split_conv_x3 = self.conv_layer(split_conv_x3, filters=288, kernel_size=[3, 3],name=scope + '_split_conv6')
+            split_conv_x3 = self.conv_layer(split_conv_x3, filters=320, kernel_size=[3, 3], strides=2, padding='VALID',name=scope + '_split_conv7')
+
+            x = tf.concat([split_max_x, split_conv_x1, split_conv_x2, split_conv_x3],axis=3)
+
+            x = tf.layers.BatchNormalization(name=scope + '_batch1')(x)
+            x = tf.nn.leaky_relu(x)
+
+            return x
+
+    def Squeeze_excitation_layer(self, input_x, out_dim, ratio, layer_name):
+        with tf.variable_scope(layer_name) :
+            squeeze = tf.keras.layers.GlobalAveragePooling2D()(input_x)
+
+            excitation = tf.layers.Dense(units=out_dim / ratio, name=layer_name+'_fully_connected1')(squeeze)
+            excitation = tf.nn.leaky_relu(excitation)
+            excitation = tf.layers.Dense(units=out_dim, name=layer_name+'_fully_connected2')(excitation)
+            excitation = tf.nn.sigmoid(excitation)
+
+            excitation = tf.reshape(excitation, [-1,1,1,out_dim])
+
+            scale = input_x * excitation
+
+            return scale
+
+    def inference(self, input_x):
+        input_x = tf.pad(input_x, [[0, 0], [32, 32], [32, 32], [0, 0]])
+        # size 32 -> 96
+        #print(np.shape(input_x))
+        # only cifar10 architecture
+
+        x = self.Stem(input_x, scope='stem')
+
+        for i in range(5):
+            x = self.Inception_resnet_A(x, scope='Inception_A' + str(i))
+            channel = int(np.shape(x)[-1])
+            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_A' + str(i))
+
+        x = self.Reduction_A(x, scope='Reduction_A')
+
+        channel = int(np.shape(x)[-1])
+        x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_A')
+
+        for i in range(10):
+            x = self.Inception_resnet_B(x, scope='Inception_B' + str(i))
+            channel = int(np.shape(x)[-1])
+            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B' + str(i))
+
+        x = self.Reduction_B(x, scope='Reduction_B')
+
+        channel = int(np.shape(x)[-1])
+        x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B')
+
+        for i in range(5):
+            x = self.Inception_resnet_C(x, scope='Inception_C' + str(i))
+            channel = int(np.shape(x)[-1])
+            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C' + str(i))
+
+        channel = int(np.shape(x)[-1])
+        x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C')
 
         x = tf.keras.layers.GlobalAveragePooling2D()(x)
         x = tf.layers.Dropout(rate=0.2)(x)

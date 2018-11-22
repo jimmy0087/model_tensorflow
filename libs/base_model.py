@@ -49,13 +49,30 @@ class BASE_MODEL:
     def layer_add(self,layer,name):
         self.sequence_layer[name] = layer
 
-    def inference(self,input):
-        return input
-
     def model_shape(self,input):
         print("The model shape is:")
         for  key in self.sequence_layer.keys():
             print(self.sequence_layer[key].get_shape())
+
+    def conv_layer(self,input_tensor,filters,kernel_size,strides=(1, 1),
+                   padding='same',activation = True, use_bn = False, use_bias = True ,name=""):
+        with tf.variable_scope(name) as scope:
+            x = tf.layers.Conv2D(
+                filters, kernel_size,
+                strides=strides,
+                padding=padding,
+                use_bias=use_bias,
+                kernel_initializer='he_normal',
+                name=name + '_res')(input_tensor)
+            if use_bn == True:
+                x = tf.layers.BatchNormalization(name=name + '_bn')(x)
+            if activation == True:
+                x = tf.nn.relu(x, name='relu')
+
+        return x
+
+    def inference(self,input):
+        return input
 
     def loss(self,input_pre,label):
         #output = self.inference(input)
@@ -92,7 +109,7 @@ class MODEL_GRAPH:
         self.evaluate_acc = self.model.evaluate(self.output_pre, self.label)
 
         #_ = self.model.model_shape(self.input_image)
-        self.train_op = tf.train.AdamOptimizer(LR).minimize(self.loss_op,self.global_step)
+        self.train_op = tf.train.MomentumOptimizer(LR,0.9).minimize(self.loss_op,self.global_step)
         self.init = tf.global_variables_initializer()
         self.sess = tf.Session()
         self.saver = tf.train.Saver(max_to_keep=0)
