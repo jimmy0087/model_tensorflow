@@ -84,9 +84,9 @@ class SEResNeXt(BASE_MODEL):
             else:
                 pad_input_x = input_tensor
 
-            x = tf.nn.leaky_relu(x + pad_input_x)
+            input_tensor = tf.nn.leaky_relu(x + pad_input_x)
 
-        return x
+        return input_tensor
 
     def inference(self, input_x):
         with tf.variable_scope("SEResNeXt",reuse=tf.AUTO_REUSE) as scope:
@@ -217,7 +217,7 @@ class SEInceptionV4(BASE_MODEL):
 
             split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(input_tensor)
 
-            split_conv_x1 = tf.layers.Conv2D(filters=n, kernel_size=(3,3), strides=2, padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv1')(input_tensor)
+            split_conv_x1 = tf.layers.Conv2D( filters=n, kernel_size=(3,3), strides=2, padding='VALID', kernel_initializer='he_normal',name=scope+'_split_conv1')(input_tensor)
 
             split_conv_x2 = tf.layers.Conv2D( filters=k, kernel_size=(1,1), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv2')(input_tensor)
             split_conv_x2 = tf.layers.Conv2D( filters=l, kernel_size=(3,3), padding='same', kernel_initializer='he_normal',name=scope+'_split_conv3')(split_conv_x2)
@@ -255,9 +255,9 @@ class SEInceptionV4(BASE_MODEL):
         with tf.variable_scope(layer_name) :
             squeeze = tf.keras.layers.GlobalAveragePooling2D()(input_x)
 
-            excitation = tf.layers.Dense(units=out_dim / ratio, name=layer_name+'_fully_connected1')(squeeze)
+            excitation = tf.layers.Dense(units=out_dim / ratio, name=layer_name + '_fully_connected1')(squeeze)
             excitation = tf.nn.leaky_relu(excitation)
-            excitation = tf.layers.Dense(units=out_dim, name=layer_name+'_fully_connected2')(excitation)
+            excitation = tf.layers.Dense(units=out_dim, name=layer_name + '_fully_connected2')(excitation)
             excitation = tf.nn.sigmoid(excitation)
 
             excitation = tf.reshape(excitation, [-1,1,1,out_dim])
@@ -280,7 +280,7 @@ class SEInceptionV4(BASE_MODEL):
 
         x = self.Reduction_A(x, scope='Reduction_A')
 
-        for i in range(7)  :
+        for i in range(7) :
             x = self.Inception_B(x, scope='Inception_B'+str(i))
             channel = int(np.shape(x)[-1])
             x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B'+str(i))
@@ -363,7 +363,7 @@ class SEInceptionResnetV2(BASE_MODEL):
         with tf.variable_scope(scope):
             init = input_tensor
 
-            split_conv_x1 = self.conv_layer(input_tensor , filters=192, kernel_size=[1, 1], padding='same',name=scope + '_split_conv1')
+            split_conv_x1 = self.conv_layer( input_tensor , filters=192, kernel_size=[1, 1], padding='same',name=scope + '_split_conv1')
 
             split_conv_x2 = self.conv_layer( input_tensor , filters=128, kernel_size=[1, 1], padding='same',name=scope + '_split_conv2')
             split_conv_x2 = self.conv_layer(split_conv_x2 , filters=160, kernel_size=[1, 7], padding='same',name=scope + '_split_conv3')
@@ -410,9 +410,9 @@ class SEInceptionResnetV2(BASE_MODEL):
 
             split_max_x = tf.layers.MaxPooling2D(pool_size=(3,3),strides=2,padding='valid')(input_tensor)
 
-            split_conv_x1 = self.conv_layer(input_tensor, filters=n, kernel_size=[3, 3], strides=2, padding='VALID',name=scope + '_split_conv1')
+            split_conv_x1 = self.conv_layer(input_tensor , filters=n, kernel_size=[3, 3], strides=2, padding='VALID',name=scope + '_split_conv1')
 
-            split_conv_x2 = self.conv_layer(input_tensor, filters=k, kernel_size=[1, 1], name=scope + '_split_conv2')
+            split_conv_x2 = self.conv_layer(input_tensor , filters=k, kernel_size=[1, 1], name=scope + '_split_conv2')
             split_conv_x2 = self.conv_layer(split_conv_x2, filters=l, kernel_size=[3, 3], name=scope + '_split_conv3')
             split_conv_x2 = self.conv_layer(split_conv_x2, filters=m, kernel_size=[3, 3], strides=2, padding='VALID', name=scope + '_split_conv4')
 
