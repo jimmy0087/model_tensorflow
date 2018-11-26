@@ -9,8 +9,7 @@ import Inception_resnet_v2 as Inception_resnet_v2
 
 from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
-from base_model import *
-
+from graph_building import *
 
 BATCH_SIZE = 128
 IMG_WEIGHT = 28
@@ -21,7 +20,7 @@ LR = 0.1
 EPOCH =30
 class DATA_FASHION:
     def __init__(self):
-        self.data = input_data.read_data_sets('/home/jimxiang/YangCheng/model_tensorflow/datasets/fashion',one_hot=True)
+        self.data = input_data.read_data_sets('../datasets/fashion',one_hot=True)
         self.train_data_num = self.data.train.num_examples
         self.test_data_num = self.data.test.num_examples
         print("data init done!")
@@ -56,8 +55,8 @@ class DATA_FASHION:
 
 if __name__=='__main__':
     data_fashion = DATA_FASHION()
-    MODEL = SE_Net.SEInceptionResnetV2()
-    fashion_graph = MODEL_GRAPH(MODEL,data_fashion,"/home/jimxiang/YangCheng/model_tensorflow/model/SEInceptionResnetV2/SEInceptionResnetV2")
+    MODEL = SE_Net.SEResNeXt()
+    fashion_graph = MODEL_GRAPH_MUL(MODEL,data_fashion,"../model/SE_Net/SE_Net")
     fashion_graph.train(30)
     # image = data_fashion.test_data()[0][0:128]
     # image=np.resize(image, (128, IMG_WEIGHT, IMG_HIGH, IMG_CHANNEL))
