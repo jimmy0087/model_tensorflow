@@ -97,6 +97,7 @@ class SEResNeXt(BASE_MODEL):
             x = self.residual_layer(x, out_dim=256, layer_num='3')
 
             x = tf.keras.layers.GlobalAveragePooling2D()(x)
+            x = tf.layers.Dropout(rate=0.2)(x)
             x = tf.layers.Flatten()(x)
 
             x = tf.layers.Dense(self.num_classes,activation='softmax',name='final_fully_connected')(x)
@@ -270,33 +271,33 @@ class SEInceptionV4(BASE_MODEL):
         input_x = tf.pad(input_x, [[0, 0], [32, 32], [32, 32], [0, 0]])
         # size 32 -> 96
         # only cifar10 architecture
+        with tf.variable_scope("SEInceptionV4", reuse=tf.AUTO_REUSE) as scope:
+            x = self.Stem(input_x, scope='stem')
 
-        x = self.Stem(input_x, scope='stem')
+            for i in range(4) :
+                x = self.Inception_A(x, scope='Inception_A'+str(i))
+                channel = int(np.shape(x)[-1])
+                x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_A'+str(i))
 
-        for i in range(4) :
-            x = self.Inception_A(x, scope='Inception_A'+str(i))
-            channel = int(np.shape(x)[-1])
-            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_A'+str(i))
+            x = self.Reduction_A(x, scope='Reduction_A')
 
-        x = self.Reduction_A(x, scope='Reduction_A')
+            for i in range(7) :
+                x = self.Inception_B(x, scope='Inception_B'+str(i))
+                channel = int(np.shape(x)[-1])
+                x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B'+str(i))
 
-        for i in range(7) :
-            x = self.Inception_B(x, scope='Inception_B'+str(i))
-            channel = int(np.shape(x)[-1])
-            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B'+str(i))
+            x = self.Reduction_B(x, scope='Reduction_B')
 
-        x = self.Reduction_B(x, scope='Reduction_B')
+            for i in range(3) :
+                x = self.Inception_C(x, scope='Inception_C'+str(i))
+                channel = int(np.shape(x)[-1])
+                x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C'+str(i))
 
-        for i in range(3) :
-            x = self.Inception_C(x, scope='Inception_C'+str(i))
-            channel = int(np.shape(x)[-1])
-            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C'+str(i))
+            x = tf.keras.layers.GlobalAveragePooling2D()(x)
+            x = tf.layers.Dropout(rate=0.2)(x)
+            x = tf.layers.Flatten()(x)
 
-        x = tf.keras.layers.GlobalAveragePooling2D()(x)
-        x = tf.layers.Dropout(rate=0.2)(x)
-        x = tf.layers.Flatten()(x)
-
-        x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
+            x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
         return x
 
 
@@ -464,40 +465,40 @@ class SEInceptionResnetV2(BASE_MODEL):
         # size 32 -> 96
         #print(np.shape(input_x))
         # only cifar10 architecture
+        with tf.variable_scope("SEInceptionResnetV2", reuse=tf.AUTO_REUSE) as scope:
+            x = self.Stem(input_x, scope='stem')
 
-        x = self.Stem(input_x, scope='stem')
+            for i in range(5):
+                x = self.Inception_resnet_A(x, scope='Inception_A' + str(i))
+                channel = int(np.shape(x)[-1])
+                x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_A' + str(i))
 
-        for i in range(5):
-            x = self.Inception_resnet_A(x, scope='Inception_A' + str(i))
+            x = self.Reduction_A(x, scope='Reduction_A')
+
             channel = int(np.shape(x)[-1])
-            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_A' + str(i))
+            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_A')
 
-        x = self.Reduction_A(x, scope='Reduction_A')
+            for i in range(10):
+                x = self.Inception_resnet_B(x, scope='Inception_B' + str(i))
+                channel = int(np.shape(x)[-1])
+                x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B' + str(i))
 
-        channel = int(np.shape(x)[-1])
-        x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_A')
+            x = self.Reduction_B(x, scope='Reduction_B')
 
-        for i in range(10):
-            x = self.Inception_resnet_B(x, scope='Inception_B' + str(i))
             channel = int(np.shape(x)[-1])
-            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B' + str(i))
+            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B')
 
-        x = self.Reduction_B(x, scope='Reduction_B')
+            for i in range(5):
+                x = self.Inception_resnet_C(x, scope='Inception_C' + str(i))
+                channel = int(np.shape(x)[-1])
+                x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C' + str(i))
 
-        channel = int(np.shape(x)[-1])
-        x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_B')
-
-        for i in range(5):
-            x = self.Inception_resnet_C(x, scope='Inception_C' + str(i))
             channel = int(np.shape(x)[-1])
-            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C' + str(i))
+            x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C')
 
-        channel = int(np.shape(x)[-1])
-        x = self.Squeeze_excitation_layer(x, out_dim=channel, ratio=reduction_ratio, layer_name='SE_C')
+            x = tf.keras.layers.GlobalAveragePooling2D()(x)
+            x = tf.layers.Dropout(rate=0.2)(x)
+            x = tf.layers.Flatten()(x)
 
-        x = tf.keras.layers.GlobalAveragePooling2D()(x)
-        x = tf.layers.Dropout(rate=0.2)(x)
-        x = tf.layers.Flatten()(x)
-
-        x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
+            x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
         return x
