@@ -148,7 +148,7 @@ class FAN56(BASE_MODEL):
             return x
 
     def inference(self,input):
-        #input = tf.pad(input, [[0, 0], [98, 98], [98, 98], [0, 0]])
+        input = tf.pad(input, [[0, 0], [98, 98], [98, 98], [0, 0]])
         with tf.variable_scope("FAN56", reuse=tf.AUTO_REUSE) as scope:
             x = self.conv_layer(input, filters=64, kernel_size=(7, 7), strides=2,padding='same',
                                 use_bn=True, use_bias=False, name= 'conv1')
@@ -175,6 +175,38 @@ class FAN56(BASE_MODEL):
 
             return x
 
+class FAN92(FAN56):
+    def __init__(self,num_classes=10,trainable = True):
+        self.num_classes = num_classes
+        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
 
+    def inference(self,input):
+        input = tf.pad(input, [[0, 0], [98, 98], [98, 98], [0, 0]])
+        with tf.variable_scope("FAN56", reuse=tf.AUTO_REUSE) as scope:
+            x = self.conv_layer(input, filters=64, kernel_size=(7, 7), strides=2,padding='same',
+                                use_bn=True, use_bias=False, name= 'conv1')
+            x = tf.layers.MaxPooling2D(pool_size=(3, 3), strides=2, padding='same')(x)
 
+            x = self.ResidualBlock(x , 256,'res_unit_1')
+            x = self.AttentionModule_stage0(x , 256,'attention_1')
 
+            x = self.ResidualBlock(x, 512, 'res_unit_2',strides=2)
+            x = self.AttentionModule_stage1(x, 512, 'attention_2')
+            x = self.AttentionModule_stage1(x, 512, 'attention_3')
+
+            x = self.ResidualBlock(x, 1024, 'res_unit_3',strides=2)
+            x = self.AttentionModule_stage2(x, 1024, 'attention_4')
+            x = self.AttentionModule_stage2(x, 1024, 'attention_5')
+            x = self.AttentionModule_stage2(x, 1024, 'attention_6')
+
+            x = self.ResidualBlock(x, 2048, 'res_unit_4',strides=2)
+            x = self.ResidualBlock(x, 2048, 'res_unit_5')
+            x = self.ResidualBlock(x, 2048, 'res_unit_6')
+
+            x = tf.keras.layers.GlobalAveragePooling2D()(x)
+            x = tf.layers.Dropout(rate=0.2)(x)
+            x = tf.layers.Flatten()(x)
+
+            x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
+
+            return x
