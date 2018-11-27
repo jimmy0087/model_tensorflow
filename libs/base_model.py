@@ -54,7 +54,7 @@ class BASE_MODEL:
                 strides=strides,
                 padding=padding,
                 use_bias=use_bias,
-                kernel_initializer='he_normal',
+                kernel_initializer='glorot_uniform',
                 name=name + '_res')(input_tensor)
             if use_bn == True:
                 x = tf.layers.BatchNormalization(name=name + '_bn')(x)
