@@ -38,15 +38,15 @@ class FAN56(BASE_MODEL):
             out_softmax3 = self.ResidualBlock(x, output_channels, scope + '_softmax_3')
 
             out_softmax4 = self.ResidualBlock(out_softmax3, output_channels, scope + '_softmax_4')
-            x = tf.layers.Conv2DTranspose(output_channels, kernel_size=3, strides=2, padding='same')(out_softmax4)
+            x = tf.keras.layers.UpSampling2D()(out_softmax4)
             x = x + out_softmax2 + out_skip2_connection
 
             out_softmax5 = self.ResidualBlock(x, output_channels, scope + '_softmax_5')
-            x = tf.layers.Conv2DTranspose(output_channels, kernel_size=3, strides=2, padding='same')(out_softmax5)
+            x = tf.keras.layers.UpSampling2D()(out_softmax5)
             x = x + out_softmax1 + out_skip1_connection
 
             out_softmax6 = self.ResidualBlock(x, output_channels, scope + '_softmax_6')
-            x = tf.layers.Conv2DTranspose(output_channels, kernel_size=3, strides=2, padding='same')(out_softmax6)
+            x = tf.keras.layers.UpSampling2D()(out_softmax6)
             x = x + input_tensor
 
             x = self.conv_layer( x , filters=output_channels, kernel_size=1, padding='same',
@@ -68,11 +68,11 @@ class FAN56(BASE_MODEL):
             out_softmax2 = self.ResidualBlock(x, output_channels, scope + '_softmax_2')
 
             out_softmax3 = self.ResidualBlock(out_softmax2, output_channels, scope + '_softmax_3')
-            x = tf.layers.Conv2DTranspose(output_channels, kernel_size=3, strides=2, padding='same')(out_softmax3)
+            x = tf.keras.layers.UpSampling2D()(out_softmax3)
             x = x + out_softmax1 + out_skip1_connection
 
             out_softmax4 = self.ResidualBlock(x, output_channels, scope + '_softmax_4')
-            x = tf.layers.Conv2DTranspose(output_channels, kernel_size=3, strides=2, padding='same')(out_softmax4)
+            x = tf.keras.layers.UpSampling2D()(out_softmax4)
             x = x + input_tensor
 
             x = self.conv_layer( x , filters=output_channels, kernel_size=1, padding='same',
@@ -90,7 +90,7 @@ class FAN56(BASE_MODEL):
             out_softmax1 = self.ResidualBlock(x, output_channels, scope + '_softmax_1')
 
             out_softmax2 = self.ResidualBlock(out_softmax1, output_channels, scope + '_softmax_2')
-            x = tf.layers.Conv2DTranspose(output_channels, kernel_size=3, strides=2, padding='same')(out_softmax2)
+            x = tf.keras.layers.UpSampling2D()(out_softmax2)
             x = x + input_tensor
 
             x = self.conv_layer( x , filters=output_channels, kernel_size=1, padding='same',
@@ -155,10 +155,10 @@ class FAN56(BASE_MODEL):
             x = tf.layers.MaxPooling2D(pool_size=(3, 3), strides=2, padding='same')(x)
 
             x = self.ResidualBlock(x , 256,'res_unit_1')
-            x = self.AttentionModule_stage2(x , 256,'attention_1')
+            x = self.AttentionModule_stage0(x , 256,'attention_1')
 
             x = self.ResidualBlock(x, 512, 'res_unit_2',strides=2)
-            x = self.AttentionModule_stage2(x, 512, 'attention_2')
+            x = self.AttentionModule_stage1(x, 512, 'attention_2')
 
             x = self.ResidualBlock(x, 1024, 'res_unit_3',strides=2)
             x = self.AttentionModule_stage2(x, 1024, 'attention_3')
@@ -168,8 +168,8 @@ class FAN56(BASE_MODEL):
             x = self.ResidualBlock(x, 2048, 'res_unit_6')
 
             x = tf.keras.layers.GlobalAveragePooling2D()(x)
-
-            #x = tf.layers.Flatten()(x)
+            x = tf.layers.Dropout(rate=0.2)(x)
+            x = tf.layers.Flatten()(x)
 
             x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
 
