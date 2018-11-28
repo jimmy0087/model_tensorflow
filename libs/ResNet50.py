@@ -3,7 +3,7 @@ import tensorflow as tf
 
 class ResNet50(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def identity_block(self,input_tensor,kernel_size,filters,stage,block="",branch=""):
         filters1, filters2, filters3 = filters
@@ -72,7 +72,7 @@ class ResNet50(BASE_MODEL):
         return x
 
     def inference(self,input):
-        x = input
+        x = tf.pad(input, [[0, 0], [32, 32], [32, 32], [0, 0]])
         with tf.variable_scope("ResNet",reuse=tf.AUTO_REUSE) as scope:
             x = tf.layers.Conv2D(64, (7, 7),
                               strides=(2, 2),

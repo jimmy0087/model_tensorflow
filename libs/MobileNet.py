@@ -2,7 +2,7 @@ from base_model import *
 import tensorflow as tf
 class MobileNet(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def _conv_block(self,input_tensor, filter,alpha,kernel = (3, 3),strides = (1, 1), name=''):
         x = input_tensor

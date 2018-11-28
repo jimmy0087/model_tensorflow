@@ -7,8 +7,7 @@ reduction_ratio = 4
 
 class SEResNeXt(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        self.num_classes = num_classes
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def first_layer(self,input_tensor,scope):
         with tf.variable_scope(scope):
@@ -94,21 +93,20 @@ class SEResNeXt(BASE_MODEL):
 
             x = self.residual_layer(input_x, out_dim=64, layer_num='1')
             x = self.residual_layer(x, out_dim=128, layer_num='2')
-            x = self.residual_layer(x, out_dim=256, layer_num='3')
+            # x = self.residual_layer(x, out_dim=256, layer_num='3')
 
             x = tf.keras.layers.GlobalAveragePooling2D()(x)
             x = tf.layers.Dropout(rate=0.2)(x)
             x = tf.layers.Flatten()(x)
 
-            x = tf.layers.Dense(self.num_classes,activation='softmax',name='final_fully_connected')(x)
+            x = tf.layers.Dense(self.output_nums,activation='softmax',name='final_fully_connected')(x)
         return x
 
 
 
 class SEInceptionV4(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        self.num_classes = num_classes
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def Stem(self, input_tensor, scope):
         with tf.variable_scope(scope) :
@@ -297,14 +295,13 @@ class SEInceptionV4(BASE_MODEL):
             x = tf.layers.Dropout(rate=0.2)(x)
             x = tf.layers.Flatten()(x)
 
-            x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
+            x = tf.layers.Dense(self.output_nums, activation='softmax', name='final_fully_connected')(x)
         return x
 
 
 class SEInceptionResnetV2(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        self.num_classes = num_classes
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
         
     def Stem(self, input_tensor, scope):
         with tf.variable_scope(scope) :
@@ -500,5 +497,5 @@ class SEInceptionResnetV2(BASE_MODEL):
             x = tf.layers.Dropout(rate=0.2)(x)
             x = tf.layers.Flatten()(x)
 
-            x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
+            x = tf.layers.Dense(self.output_nums, activation='softmax', name='final_fully_connected')(x)
         return x

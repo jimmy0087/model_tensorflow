@@ -23,7 +23,7 @@ class MODEL_GRAPH:
         :param model:
         :param datasets:
         """
-        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
         self.data_source = datasets
         self.model = model
         self.model_save_path = model_save_path
@@ -42,7 +42,7 @@ class MODEL_GRAPH:
         #_ = self.model.model_shape(self.input_image)
         self.train_op = tf.train.MomentumOptimizer(LR,0.9).minimize(self.loss_op,self.global_step)
         self.init = tf.global_variables_initializer()
-        self.sess = tf.Session()
+        self.sess = tf.Session(config = tf.ConfigProto(allow_soft_placement=True))
         self.saver = tf.train.Saver(max_to_keep=0)
         self.coord = tf.train.Coordinator()
         # begin enqueue thread

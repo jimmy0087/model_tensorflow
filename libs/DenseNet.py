@@ -2,7 +2,7 @@ from base_model import *
 import tensorflow as tf
 class DenseNet(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def conv_block(self,input_tensor, growth_rate, name):
         x = input_tensor

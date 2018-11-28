@@ -2,8 +2,7 @@ from base_model import *
 
 class FAN56(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        self.num_classes = num_classes
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def ResidualBlock(self,input_tensor,output_channels,scope,strides=1):
         with tf.variable_scope(scope):
@@ -171,14 +170,13 @@ class FAN56(BASE_MODEL):
             x = tf.layers.Dropout(rate=0.2)(x)
             x = tf.layers.Flatten()(x)
 
-            x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
+            x = tf.layers.Dense(self.output_nums, activation='softmax', name='final_fully_connected')(x)
 
             return x
 
 class FAN92(FAN56):
     def __init__(self,num_classes=10,trainable = True):
-        self.num_classes = num_classes
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def inference(self,input):
         input = tf.pad(input, [[0, 0], [98, 98], [98, 98], [0, 0]])
@@ -207,6 +205,6 @@ class FAN92(FAN56):
             x = tf.layers.Dropout(rate=0.2)(x)
             x = tf.layers.Flatten()(x)
 
-            x = tf.layers.Dense(self.num_classes, activation='softmax', name='final_fully_connected')(x)
+            x = tf.layers.Dense(self.output_nums, activation='softmax', name='final_fully_connected')(x)
 
             return x

@@ -2,7 +2,7 @@ from base_model import *
 import tensorflow as tf
 class Vgg16Net(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def vgg_block(self,input_tensor,filters,cov_num=1,name="block_"):
         x = input_tensor
@@ -10,14 +10,14 @@ class Vgg16Net(BASE_MODEL):
             for i in range(cov_num):
                 cur_name = "cov_"+str(i)
                 x = tf.layers.Conv2D(filters = filters,  kernel_size=3, strides=(1,1), padding='same',
-                             kernel_initializer=layers_lib.xavier_initializer(),
+                             kernel_initializer='glorot_uniform',
                              trainable=True,
                              name=cur_name)(x)
                 self.layer_add(x, name=x.name)
         return x
 
     def inference(self,input):
-        x = input
+        x = tf.pad(input, [[0, 0], [32, 32], [32, 32], [0, 0]])
         self.layer_add(x, name="input")
         with tf.variable_scope("VggNet",reuse=tf.AUTO_REUSE) as scope:
             x = self.vgg_block(x,filters = 64,cov_num = 2,name="block_1")

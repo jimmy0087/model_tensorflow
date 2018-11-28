@@ -2,7 +2,7 @@ from base_model import *
 import tensorflow as tf
 class Xception(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
 
     def conv2d_bn(self,input_tensor,filters,kernel_size,padding='same',strides=(1, 1),use_bias=False,activation='relu',name=""):
         with tf.variable_scope(name) as scope:

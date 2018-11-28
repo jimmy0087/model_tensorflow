@@ -2,13 +2,13 @@ from base_model import *
 
 class AlexNet(BASE_MODEL):
     def __init__(self,num_classes=10,trainable = True):
-        BASE_MODEL.__init__(self,num_classes=10,trainable = True)
+        BASE_MODEL.__init__(self,num_classes=num_classes,trainable = True)
     def inference(self,input):
         x= input
         self.layer_add(x, name='input')
         with tf.variable_scope("AlexNet",reuse=tf.AUTO_REUSE) as scope:
             x = tf.layers.Conv2D(filters = 96,  kernel_size=3, strides=(1,1), padding='same',
-                             kernel_initializer=layers_lib.xavier_initializer(),
+                             kernel_initializer='glorot_uniform',
                              trainable=True,
                              name='cov_1')(x)
             self.layer_add(x,name='cov_1')
@@ -18,7 +18,7 @@ class AlexNet(BASE_MODEL):
             self.layer_add(x, name='maxpool_1')
 
             x = tf.layers.Conv2D(filters = 256,  kernel_size=5, strides=(1,1), padding='same',
-                             kernel_initializer=layers_lib.xavier_initializer(),
+                             kernel_initializer='glorot_uniform',
                              trainable=True,
                              name='cov_2')(x)
             self.layer_add(x, name='cov_2')
@@ -28,19 +28,19 @@ class AlexNet(BASE_MODEL):
             self.layer_add(x, name='maxpool_2')
 
             x = tf.layers.Conv2D(filters=384, kernel_size=3, strides=(1, 1), padding='same',
-                             kernel_initializer=layers_lib.xavier_initializer(),
+                             kernel_initializer='glorot_uniform',
                              trainable=True,
                              name='cov_3')(x)
             self.layer_add(x, name='cov_3')
 
             x = tf.layers.Conv2D(filters=384, kernel_size=3, strides=(1, 1), padding='same',
-                             kernel_initializer=layers_lib.xavier_initializer(),
+                             kernel_initializer='glorot_uniform',
                              trainable=True,
                              name='cov_4')(x)
             self.layer_add(x, name='cov_4')
 
             x = tf.layers.Conv2D(filters=256, kernel_size=3, strides=(1, 1), padding='same',
-                             kernel_initializer=layers_lib.xavier_initializer(),
+                             kernel_initializer='glorot_uniform',
                              trainable=True,
                              name='cov_5')(x)
             self.layer_add(x, name='cov_5')
